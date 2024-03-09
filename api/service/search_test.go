@@ -9,9 +9,9 @@ import (
 )
 
 func TestSearchKeyword(t *testing.T) {
-	cli := service.NewSearchClient(msToken, cookie)
+	cli := service.NewSearchClient(cookie)
 	ctx := context.Background()
-	res, err := cli.SearchKeyword(ctx, "china")
+	res, err := cli.SearchKeyword(ctx, "mask")
 	t.Logf("%v", err)
 	t.Logf("%s", log.NewLogString(res))
 }

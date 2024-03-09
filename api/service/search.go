@@ -9,22 +9,17 @@ import (
 	"github.com/pkg/errors"
 )
 
-
 type SearchClient struct {
-	cliHTTP  *http.Client
-	msgToken string
-	cookie   string
+	cliHTTP *http.Client
+	cookie  string
 }
 
-func NewSearchClient(msgToken, cookie string) *SearchClient {
+func NewSearchClient(cookie string) *SearchClient {
 	return &SearchClient{
-		cliHTTP:  http.NewDftClient(),
-		msgToken: msgToken,
-		cookie:   cookie,
+		cliHTTP: http.NewDftClient(),
+		cookie:  cookie,
 	}
 }
-
-
 
 func (cli SearchClient) SearchKeyword(ctx context.Context, keyword string) (res *model.SearchResp, err error) {
 	resp, err := cli.cliHTTP.WithCtx(ctx).
@@ -32,9 +27,8 @@ func (cli SearchClient) SearchKeyword(ctx context.Context, keyword string) (res 
 		SetQueryParam("aid", "1988").
 		SetQueryParam("app_name", "tiktok_web").
 		SetQueryParam("keyword", keyword).
-		SetQueryParam("msToken", cli.msgToken).
 		SetHeader("authority", "www.tiktok.com").
-		SetHeader("cookie", cli.cookie).SetDebug(true).
+		SetHeader("cookie", cli.cookie).
 		Get(host + "/api/search/general/full/?")
 	if err != nil {
 		return nil, errors.Wrapf(err, "http get failed")

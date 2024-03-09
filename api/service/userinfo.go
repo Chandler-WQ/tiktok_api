@@ -2,12 +2,50 @@ package service
 
 import (
 	"context"
-	"encoding/json"
+	"regexp"
 
 	"github.com/Chandler-WQ/tiktok_api/api/model"
 	"github.com/Chandler-WQ/tiktok_api/util/http"
+	"github.com/bytedance/sonic"
 	"github.com/pkg/errors"
 )
+
+var re = regexp.MustCompile(`<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" type="application/json">([\w\W]*?)</script>`)
+
+type UserExtractor struct {
+	re   *regexp.Regexp
+	body []byte
+}
+
+func NewUserExtractor(body []byte) UserExtractor {
+	return UserExtractor{
+		re:   re,
+		body: body,
+	}
+
+}
+
+func (e UserExtractor) ParseUserInfo() (*model.UserInfo, error) {
+	strs := re.FindStringSubmatch(string(e.body))
+	if len(strs) == 0 {
+		return nil, errors.New("match __DEFAULT_SCOPE__ failed")
+	}
+	str := strs[len(strs)-1]
+	node, err := sonic.GetFromString(str, "__DEFAULT_SCOPE__", "webapp.user-detail", "userInfo")
+	if err != nil {
+		return nil, errors.Wrapf(err, "Get __DEFAULT_SCOPE__->webapp.user-detail->userInfo failed: %s", str)
+	}
+	str, err = node.Raw()
+	if err != nil {
+		return nil, errors.Wrapf(err, "node.String")
+	}
+	userInfo := &model.UserInfo{}
+	err = sonic.Unmarshal([]byte(str), userInfo)
+	if err != nil {
+		return nil, errors.Wrapf(err, "sonic.Unmarshal")
+	}
+	return userInfo, nil
+}
 
 type UserClient struct {
 	cliHTTP *http.Client
@@ -21,23 +59,21 @@ func NewUserClient(cookie string) *UserClient {
 	}
 }
 
-func (cli UserClient) GetUserInfo(ctx context.Context, uniqueId string) (res *model.UserInfoResp, err error) {
+func (cli UserClient) GetUserInfo(ctx context.Context, uniqueId string) (res *model.UserInfo, err error) {
 	resp, err := cli.cliHTTP.WithCtx(ctx).
-		SetQueryParam("WebIdLastTime", "0").
-		SetQueryParam("aid", "1988").
-		SetQueryParam("app_name", "tiktok_web").
-		SetQueryParam("channel", "tiktok_web").
-		SetQueryParam("uniqueId", uniqueId).
-		SetHeader("authority", "www.tiktok.com").
-		SetHeader("cookie", cli.cookie).SetDebug(true).
-		Get(host + "/api/user/detail/?")
+		SetQueryParam("is_from_webapp", "1").
+		SetQueryParam("sender_device", "pc").
+		SetHeader("cookie", cli.cookie).
+		Get(host + "/@" + uniqueId)
 	if err != nil {
 		return nil, errors.Wrapf(err, "http get failed")
 	}
-	res = &model.UserInfoResp{}
-	err = json.Unmarshal(resp.Body(), res)
+	body := resp.Body()
+
+	extractor := NewUserExtractor(body)
+	userInfo, err := extractor.ParseUserInfo()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "extractor.ParseUserInfo")
 	}
-	return res, nil
+	return userInfo, nil
 }

@@ -126,36 +126,44 @@ type AuthorStats struct {
 	Heart          int `json:"heart"`
 }
 type Item struct {
-	ID                string       `json:"id"`
-	Desc              string       `json:"desc"`
-	CreateTime        int          `json:"createTime"`
-	Video             Video        `json:"video"`
-	Author            Author       `json:"author"`
-	Music             Music        `json:"music"`
-	Challenges        []Challenges `json:"challenges"`
-	Stats             Stats        `json:"stats"`
-	DuetInfo          DuetInfo     `json:"duetInfo"`
-	OriginalItem      bool         `json:"originalItem"`
-	OfficalItem       bool         `json:"officalItem"`
-	TextExtra         []TextExtra  `json:"textExtra"`
-	Secret            bool         `json:"secret"`
-	ForFriend         bool         `json:"forFriend"`
-	Digged            bool         `json:"digged"`
-	ItemCommentStatus int          `json:"itemCommentStatus"`
-	ShowNotPass       bool         `json:"showNotPass"`
-	Vl1               bool         `json:"vl1"`
-	ItemMute          bool         `json:"itemMute"`
-	AuthorStats       AuthorStats  `json:"authorStats"`
-	PrivateItem       bool         `json:"privateItem"`
-	DuetEnabled       bool         `json:"duetEnabled"`
-	StitchEnabled     bool         `json:"stitchEnabled"`
-	ShareEnabled      bool         `json:"shareEnabled"`
-	IsAd              bool         `json:"isAd"`
-	Collected         bool         `json:"collected"`
+	ID                string           `json:"id"`
+	Desc              string           `json:"desc"`
+	CreateTime        int              `json:"createTime"`
+	Video             Video            `json:"video"`
+	Author            Author           `json:"author"`
+	Music             Music            `json:"music"`
+	Challenges        []Challenges     `json:"challenges"`
+	Stats             Stats            `json:"stats"`
+	DuetInfo          DuetInfo         `json:"duetInfo"`
+	OriginalItem      bool             `json:"originalItem"`
+	OfficalItem       bool             `json:"officalItem"`
+	TextExtra         []TextExtra      `json:"textExtra"`
+	Secret            bool             `json:"secret"`
+	ForFriend         bool             `json:"forFriend"`
+	Digged            bool             `json:"digged"`
+	ItemCommentStatus int              `json:"itemCommentStatus"`
+	ShowNotPass       bool             `json:"showNotPass"`
+	Vl1               bool             `json:"vl1"`
+	ItemMute          bool             `json:"itemMute"`
+	AuthorStats       AuthorStats      `json:"authorStats"`
+	PrivateItem       bool             `json:"privateItem"`
+	DuetEnabled       bool             `json:"duetEnabled"`
+	StitchEnabled     bool             `json:"stitchEnabled"`
+	ShareEnabled      bool             `json:"shareEnabled"`
+	IsAd              bool             `json:"isAd"`
+	Collected         bool             `json:"collected"`
+	EffectStickers    []EffectStickers `json:"effectStickers"`
 }
+
+type EffectStickers struct {
+	Name string `json:"name"`
+	ID   string `json:"ID"`
+}
+
 type Common struct {
 	DocIDStr string `json:"doc_id_str"`
 }
+
 type Icon struct {
 	URLList []string `json:"urlList"`
 }
@@ -188,6 +196,7 @@ type VideoSuggestWordsStruct struct {
 	Scene    string  `json:"scene"`
 	HintText string  `json:"hint_text"`
 }
+
 type VideoSuggestWordsList struct {
 	VideoSuggestWordsStruct []VideoSuggestWordsStruct `json:"video_suggest_words_struct"`
 }
