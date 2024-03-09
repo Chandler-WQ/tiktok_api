@@ -50,6 +50,7 @@ func (e UserExtractor) ParseUserInfo() (*model.UserInfo, error) {
 type UserClient struct {
 	cliHTTP *http.Client
 	cookie  string
+	debug   bool
 }
 
 func NewUserClient(cookie string) *UserClient {
@@ -59,11 +60,15 @@ func NewUserClient(cookie string) *UserClient {
 	}
 }
 
+func (cli UserClient) WithDebug(debug bool) {
+	cli.debug = debug
+}
+
 func (cli UserClient) GetUserInfo(ctx context.Context, uniqueId string) (res *model.UserInfo, err error) {
 	resp, err := cli.cliHTTP.WithCtx(ctx).
 		SetQueryParam("is_from_webapp", "1").
 		SetQueryParam("sender_device", "pc").
-		SetHeader("cookie", cli.cookie).
+		SetHeader("cookie", cli.cookie).SetDebug(cli.debug).
 		Get(host + "/@" + uniqueId)
 	if err != nil {
 		return nil, errors.Wrapf(err, "http get failed")

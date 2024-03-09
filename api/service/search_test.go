@@ -11,7 +11,7 @@ import (
 func TestSearchKeyword(t *testing.T) {
 	cli := service.NewSearchClient(cookie)
 	ctx := context.Background()
-	res, err := cli.SearchKeyword(ctx, "mask")
+	res, err := cli.SearchKeyword(ctx, "mask", "", 0)
 	t.Logf("%v", err)
 	t.Logf("%s", log.NewLogString(res))
 }

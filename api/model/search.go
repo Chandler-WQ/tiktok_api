@@ -93,11 +93,17 @@ type Challenges struct {
 }
 
 type Stats struct {
-	DiggCount    int `json:"diggCount"`
-	ShareCount   int `json:"shareCount"`
-	CommentCount int `json:"commentCount"`
-	PlayCount    int `json:"playCount"`
-	CollectCount int `json:"collectCount"`
+	ShareCount     int `json:"shareCount"`
+	CommentCount   int `json:"commentCount"`
+	PlayCount      int `json:"playCount"`
+	CollectCount   int `json:"collectCount"`
+	FollowerCount  int `json:"followerCount"`
+	FollowingCount int `json:"followingCount"`
+	Heart          int `json:"heart"`
+	HeartCount     int `json:"heartCount"`
+	VideoCount     int `json:"videoCount"`
+	DiggCount      int `json:"diggCount"`
+	FriendCount    int `json:"friendCount"`
 }
 
 type DuetInfo struct {

@@ -54,7 +54,8 @@ type BioLink struct {
 type CommerceUserInfo struct {
 	CommerceUser bool `json:"commerceUser"`
 }
-
 type ProfileTab struct {
+	ShowMusicTab    bool `json:"showMusicTab"`
+	ShowQuestionTab bool `json:"showQuestionTab"`
 	ShowPlayListTab bool `json:"showPlayListTab"`
 }

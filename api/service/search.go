@@ -7,11 +7,17 @@ import (
 	"github.com/Chandler-WQ/tiktok_api/api/model"
 	"github.com/Chandler-WQ/tiktok_api/util/http"
 	"github.com/pkg/errors"
+	"github.com/spf13/cast"
 )
 
 type SearchClient struct {
 	cliHTTP *http.Client
 	cookie  string
+	debug   bool
+}
+
+func (cli SearchClient) WithDebug(debug bool) {
+	cli.debug = debug
 }
 
 func NewSearchClient(cookie string) *SearchClient {
@@ -21,14 +27,16 @@ func NewSearchClient(cookie string) *SearchClient {
 	}
 }
 
-func (cli SearchClient) SearchKeyword(ctx context.Context, keyword string) (res *model.SearchResp, err error) {
+func (cli SearchClient) SearchKeyword(ctx context.Context, keyword, searchId string, offset int64) (res *model.SearchResp, err error) {
 	resp, err := cli.cliHTTP.WithCtx(ctx).
 		SetQueryParam("WebIdLastTime", "0").
 		SetQueryParam("aid", "1988").
 		SetQueryParam("app_name", "tiktok_web").
 		SetQueryParam("keyword", keyword).
+		SetQueryParam("search_id", searchId).
+		SetQueryParam("offset", cast.ToString(offset)).
 		SetHeader("authority", "www.tiktok.com").
-		SetHeader("cookie", cli.cookie).
+		SetHeader("cookie", cli.cookie).SetDebug(cli.debug).
 		Get(host + "/api/search/general/full/?")
 	if err != nil {
 		return nil, errors.Wrapf(err, "http get failed")
