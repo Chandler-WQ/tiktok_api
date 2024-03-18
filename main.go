@@ -11,6 +11,7 @@ import (
 	"github.com/Chandler-WQ/tiktok_api/api/model"
 	"github.com/Chandler-WQ/tiktok_api/api/service"
 	"github.com/Chandler-WQ/tiktok_api/util/excel"
+	"github.com/Chandler-WQ/tiktok_api/util/sets"
 	"github.com/Chandler-WQ/tiktok_api/util/structinfo"
 	"github.com/pkg/errors"
 	"github.com/schollz/progressbar/v3"
@@ -118,22 +119,25 @@ func DoFind(ctx context.Context, opt *Option) error {
 	searchID := ""
 	authorInfo = append(authorInfo, structinfo.ToSliceName(model.UserInfo{}))
 	bar := progressbar.Default(times)
+	userIDs := sets.StringSets{}
 	for i := 0; i < int(times); i++ {
 		fmt.Println()
 		fmt.Printf("start search keyword:%s offset:%v searchID:%v \n", keyword, offset, searchID)
-		authorInfoTmp, nextOffset, nextSearchID, err := SearchUserInfoByKeyword(ctx, cookie, keyword, searchID, offset)
+		authorInfoTmp, nextOffset, nextSearchID, err := SearchUserInfoByKeyword(ctx, cookie, keyword, searchID, offset, userIDs)
 		if err != nil {
-			bar.Add(1)
+			_ = bar.Add(1)
 			fmt.Printf("search keyword:%s offset:%v searchID:%v  error: %v\n", keyword, offset, searchID, err)
 			continue
 		}
-		bar.Add(1)
+		_ = bar.Add(1)
 		fmt.Printf("search keyword:%s offset:%v searchID:%v  success\n", keyword, offset, searchID)
 		authorInfo = append(authorInfo, authorInfoTmp...)
 		offset = nextOffset
 		searchID = nextSearchID
 		// limit the speed of the search
-		time.Sleep(time.Second * 5)
+		if i != int(times)-1 {
+			time.Sleep(time.Second * 5)
+		}
 		fmt.Println()
 
 	}
@@ -157,7 +161,7 @@ func DoFind(ctx context.Context, opt *Option) error {
 	return nil
 }
 
-func SearchUserInfoByKeyword(ctx context.Context, cookie, keyword, searchID string, offset int64) (info [][]string, nextOffset int64, nextSearchID string, err error) {
+func SearchUserInfoByKeyword(ctx context.Context, cookie, keyword, searchID string, offset int64, existUserIDs sets.StringSets) (info [][]string, nextOffset int64, nextSearchID string, err error) {
 	resp, err := searchCli.SearchKeyword(ctx, keyword, searchID, offset)
 	if err != nil {
 		return nil, 0, "", errors.Wrapf(err, "search keyword:%s failed: %v", keyword, err)
@@ -165,6 +169,10 @@ func SearchUserInfoByKeyword(ctx context.Context, cookie, keyword, searchID stri
 	authorInfo := make([][]string, 0)
 	authorIDs := resp.CollectAuthorID()
 	for id := range authorIDs {
+		if existUserIDs.Contains(id) {
+			fmt.Printf("author %s repeat,skip \n", id)
+			continue
+		}
 		userInfo, err := userCli.GetUserInfo(ctx, id)
 		if err != nil {
 			fmt.Printf("find author %s info fail.reason %v \n", id, err)
@@ -173,6 +181,7 @@ func SearchUserInfoByKeyword(ctx context.Context, cookie, keyword, searchID stri
 		fmt.Printf("find author %s info Success\n ", id)
 		slice := structinfo.ToSlice(userInfo)
 		authorInfo = append(authorInfo, slice)
+		existUserIDs.Add(id)
 	}
 	return authorInfo, int64(resp.Cursor), resp.Extra.Logid, nil
 }

@@ -1,6 +1,6 @@
 search:
 	go build -o tt_search
-	./tt_search -keyword="mask" -find_times=2
+	./tt_search -keyword="mask" -find_times=5
 
 build:
 	go build -o tt_search
